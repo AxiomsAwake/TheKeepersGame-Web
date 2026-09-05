@@ -1,0 +1,8 @@
+.DS_Store
+*.tmp
+*.log
+web-ci.zip
+outer/
+source/
+site/
+__pycache__/

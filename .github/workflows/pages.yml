@@ -1,0 +1,62 @@
+name: Publish playable Web release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: Validate immutable release mirror
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out release mirror
+        uses: actions/checkout@v6
+
+      - name: Restore accepted compiled release
+        run: python3 scripts/restore-release.py
+
+      - name: Verify files, notices, and local HTTP delivery
+        run: scripts/check.sh
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload exact static site
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  deploy:
+    name: Deploy production page
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Verify production delivery
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 2 "${PAGE_URL}" | grep -F 'The Keepers: Influence Arena'
+          for asset in index.js index.pck index.wasm about.html; do
+            curl --fail --silent --show-error --retry 5 --retry-all-errors --retry-delay 2 --head "${PAGE_URL}${asset}"
+          done
