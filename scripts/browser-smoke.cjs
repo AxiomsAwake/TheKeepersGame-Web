@@ -31,7 +31,7 @@ function changedPixels(a, b) {
     const canvas = page.locator('#canvas');
     await canvas.waitFor({ state: 'visible' });
     await page.waitForTimeout(800); // Allow the first rendered scene to reach the capture surface.
-    assert.match(await page.locator('#release-info').innerText(), /v0\.1\.0-demo\.3/);
+    assert.match(await page.locator('#release-info').innerText(), /v0\.1\.0-demo\.4/);
     const capture = async name => {
       const image = await page.screenshot();
       writeFileSync(`artifacts/${name}.png`, image);
@@ -52,6 +52,11 @@ function changedPixels(a, b) {
     const badge = await page.locator('#release-info summary').boundingBox();
     assert.ok(badge.y >= 876, 'The release badge must stay below the command rail, clear of match status.');
     assert.ok(changedPixels(briefing, arena) > 10000, 'Starting the game must replace the briefing with a rendered battle.');
+    await page.mouse.move(720, 325); // Projected north relay in the reset camera at 1440 × 900.
+    await page.waitForTimeout(300);
+    const inspection = await capture('web-relay-inspection');
+    assert.ok(changedPixels(arena, inspection) > 800, 'Paused hover must reveal the relay inspection card.');
+    await page.mouse.move(10, 890);
     await canvas.press('v');
     await page.waitForTimeout(300);
     const ground = await capture('web-ground-view');
@@ -66,8 +71,8 @@ function changedPixels(a, b) {
     assert.ok(changedPixels(ground, restarted) > 10000, 'Restart must return from ground view to the briefing.');
     assert.deepEqual(errors, [], 'The exported game must run without script or WebGL context failures.');
     writeFileSync('artifacts/browser-result.json', JSON.stringify({
-      version: 'v0.1.0-demo.3', result: 'passed', renderer: 'Chromium WebGL2 / SwiftShader',
-      exercised: ['start', 'Scout and Guardian deploy', 'Assault doctrine', 'rally', 'pause', 'ground camera', 'camera reset', 'influence overlay', 'restart'],
+      version: 'v0.1.0-demo.4', result: 'passed', renderer: 'Chromium WebGL2 / SwiftShader',
+      exercised: ['start', 'Scout and Guardian deploy', 'Assault doctrine', 'rally', 'pause', 'paused relay inspection', 'ground camera', 'camera reset', 'influence overlay', 'restart'],
       limits: 'Pixel assertions establish rendered scene changes; deterministic gameplay correctness is covered by the source repository rule and presentation tests. This is not a human playtest.'
     }, null, 2));
     console.log('Compiled 3D Web release smoke checks passed.');

@@ -3,12 +3,12 @@
 | Field | Accepted value |
 |---|---|
 | Product | The Keepers: Influence Arena 3D |
-| Version | `v0.1.0-demo.3` |
+| Version | `v0.1.0-demo.4` |
 | Channel | Prerelease demo |
 | Accepted | 2026-09-05 |
-| Source commit | `2c7c67300c90ae24219cad9866a04ec23ec7b9a5` |
+| Source commit | `de2c9e2ffb0fec8318ea965cfc5ac0e42da6ad59` |
 | Godot | `4.7.2` |
-| Accepted release ZIP SHA-256 | `0b971d769a879c388d527e8c134aa4653463bc0894f3f4baf0ace8c1da8f0c3b` |
+| Accepted release ZIP SHA-256 | `20c1661c230308899e2f09f454d7802a9ab7168b4fa6cd97d55dfd36ad612cfb` |
 | License | Apache-2.0 for The Keepers portions; bundled notices retain their stated licenses |
 
 All eight executable/image files match the accepted Web release exactly. The ninth export, `index.html`, retains its exact engine configuration and adds only the marked release-information disclosure. `site/about.html` lists the 3D camera controls and licenses.
