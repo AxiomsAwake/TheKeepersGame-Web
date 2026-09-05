@@ -44,9 +44,13 @@ function changedPixels(a, b) {
     await canvas.press('3');
     await page.mouse.click(720, 370);
     await page.waitForTimeout(2500); // Commands resolve through the game's fixed simulation ticks.
+    await page.mouse.move(10, 890);
+    await capture('web-playing');
     await canvas.press('Space');
     await page.waitForTimeout(300);
     const arena = await capture('web-arena-3d');
+    const badge = await page.locator('#release-info summary').boundingBox();
+    assert.ok(badge.y >= 876, 'The release badge must stay below the command rail, clear of match status.');
     assert.ok(changedPixels(briefing, arena) > 10000, 'Starting the game must replace the briefing with a rendered battle.');
     await canvas.press('v');
     await page.waitForTimeout(300);
