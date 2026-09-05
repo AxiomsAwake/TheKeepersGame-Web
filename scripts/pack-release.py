@@ -17,6 +17,9 @@ with tarfile.open(fileobj=io.BytesIO(data), mode="r:gz") as archive:
             assert archive.extractfile(member).read() == (root / member.name).read_bytes()
 payload = root / ".release-payload"
 payload.mkdir(exist_ok=True)
+# A full repack incorporates every change, so any older update is obsolete.
+for stale in ['update.tar.gz', 'update.tar.gz.sha256']:
+    (payload / stale).unlink(missing_ok=True)
 for part in payload.glob("site.tar.gz.part-*"):
     part.unlink()
 for number, offset in enumerate(range(0, len(data), 384000)):

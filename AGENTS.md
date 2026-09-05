@@ -20,7 +20,7 @@ This repository has one purpose: serve the latest accepted compiled Web release 
 3. Update version references and immutable provenance in `README.md`, `RELEASE.md`, and `site/about.html`.
 4. Confirm `LICENSE`, `NOTICE`, and the exact Godot notice inventory accompany the compiled release.
 5. Refresh `CHECKSUMS.sha256` with `scripts/update-checksums.sh`.
-6. Repack with `python3 scripts/pack-release.py`, then verify restoration plus `scripts/check.sh` before every release commit. Only reviewed compiled files and notices may enter this archive. Do not commit the generated `site/` directory.
+6. For a small update with the same engine, run `python3 scripts/pack-release-delta.py`; it stores changed compiled files and notices against the existing base parts. For a replacement engine or removed files, use `python3 scripts/pack-release.py`. Verify restoration plus `scripts/check.sh` before every release commit. Only reviewed compiled files and notices may enter these archives. Do not commit the generated `site/` directory.
 7. Commit small, auditable release-mirror changes directly to `main`; wait for the Pages workflow to finish before calling a version live.
 
 ## Definition of released

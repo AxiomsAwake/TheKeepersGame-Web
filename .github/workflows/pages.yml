@@ -16,7 +16,7 @@ jobs:
   validate:
     name: Validate immutable release mirror
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - name: Check out release mirror
         uses: actions/checkout@v6
@@ -26,6 +26,31 @@ jobs:
 
       - name: Verify files, notices, and local HTTP delivery
         run: scripts/check.sh
+
+      - name: Set up browser test runtime
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Install pinned browser test dependencies
+        run: |
+          npm install --prefix "$RUNNER_TEMP/keepers-browser" --no-package-lock --no-save playwright@1.62.1 pngjs@7.0.0
+          "$RUNNER_TEMP/keepers-browser/node_modules/.bin/playwright" install --with-deps chromium
+
+      - name: Exercise the compiled 3D game in WebGL2
+        run: |
+          python3 -m http.server 4173 --directory site > /tmp/keepers-web.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          NODE_PATH="$RUNNER_TEMP/keepers-browser/node_modules" node scripts/browser-smoke.cjs
+
+      - name: Retain compiled browser evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: Keepers-Web-3D-evidence
+          path: artifacts/
+          if-no-files-found: warn
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
