@@ -1,5 +1,7 @@
 # Release-mirror operating contract
 
+Current work orientation: read [work/README.md](work/README.md) and generated [work/NOW.md](work/NOW.md), then the relevant canonical task and the product guidance below. Task records and frontier own execution state; product requirements, evidence and stronger validation remain with their existing sources.
+
 This repository has one purpose: serve the latest accepted compiled Web release of *The Keepers* from GitHub Pages.
 
 ## Boundaries
