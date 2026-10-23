@@ -1,5 +1,7 @@
 # The Keepers — playable Web release
 
+Current work: [shared backlog](work/README.md).
+
 This public repository serves **Influence Arena `v0.1.0-demo.4`**, the 3D command battle with clearer relay inspection of *The Keepers*.
 
 ## [Play in your browser](https://rmkn85.github.io/TheKeepersGame-Web/)
