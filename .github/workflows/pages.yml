@@ -10,10 +10,6 @@ on:
         description: Publish the accepted compiled mirror after validation
         type: boolean
         default: false
-      upload_evidence:
-        description: Transfer bounded review PNG/JSON only when CI_REVIEW_UPLOADS_ENABLED is true
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -54,40 +50,11 @@ jobs:
           trap 'kill "$server_pid" 2>/dev/null || true' EXIT
           NODE_PATH="$RUNNER_TEMP/keepers-browser/node_modules" node scripts/browser-smoke.cjs
 
-      - name: Select a bounded explicit review transfer
-        id: evidence
-        if: always() && github.event_name == 'workflow_dispatch' && inputs.upload_evidence == true && vars.CI_REVIEW_UPLOADS_ENABLED == 'true'
-        continue-on-error: true
-        shell: bash
+      - name: Report diagnostic review transfer status
+        if: always()
         run: |
-          python3 - <<'PY'
-          import os, pathlib, shutil
-          root = pathlib.Path('artifacts')
-          files = sorted(p for p in root.rglob('*') if p.is_file() and p.suffix.lower() in ('.png', '.json'))
-          if any(p.is_symlink() or not p.resolve().is_relative_to(root.resolve()) for p in files):
-              raise RuntimeError('Review input must be a regular owned file')
-          if not 0 < len(files) <= 96 or sum(p.stat().st_size for p in files) > 16 * 1024 * 1024:
-              print('Review transfer omitted: empty or above 16 MiB/96-file budget; test outcome is unchanged.')
-          else:
-              destination = pathlib.Path(os.environ['RUNNER_TEMP']) / ('keepers-mirror-review-' + os.environ['GITHUB_RUN_ID'] + '-' + os.environ['GITHUB_RUN_ATTEMPT'])
-              destination.mkdir(exist_ok=False)
-              for file in files:
-                  target = destination / file.relative_to(root)
-                  target.parent.mkdir(parents=True, exist_ok=True)
-                  shutil.copyfile(file, target)
-              with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
-                  output.write('directory=' + str(destination) + '\nready=true\n')
-          PY
-      - name: Transfer optional review evidence once
-        if: always() && steps.evidence.outcome == 'success' && steps.evidence.outputs.ready == 'true'
-        continue-on-error: true
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
-        with:
-          name: Keepers-Web-3D-evidence-${{ github.run_id }}-${{ github.run_attempt }}
-          path: ${{ steps.evidence.outputs.directory }}/
-          retention-days: 1
-          compression-level: 6
-          if-no-files-found: warn
+          echo 'Optional generic Actions review transfer is disabled; test details remain in this run’s logs.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'This does not change the separately gated GitHub Pages deployment transport.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Configure GitHub Pages
         if: github.event_name == 'push' || inputs.deploy == true
